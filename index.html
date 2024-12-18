@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video World</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+        .play-button {
+            width: 100px;
+            height: 50px;
+            background-color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .play-button:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.1);
+        }
+        .control-button {
+            padding: 12px;
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            cursor: pointer;
+            font-size: 18px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        .control-button:hover {
+            background-color: rgba(200, 200, 200, 1);
+        }
+        input[type=range] {
+            width: 150px;
+        }
+        #info-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        #info-button:hover {
+            background-color: rgba(200, 200, 200, 1);
+        }
+        #info-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            text-align: center;
+        }
+        #info-section.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="video-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+    <audio id="background-music" loop>
+        <source src="background.mp3">
+        
+    </audio>
+
+    <div id="controls">
+        <button class="control-button" id="mute-toggle">🔇</button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.1">
+        <button class="play-button" id="play-button">PLAY</button>
+    </div>
+
+    <button id="info-button">INFO</button>
+    <div id="info-section">이 사이트에서 재생되는 영상들은 제가 touchdesigner로 제작한 비디오 아트입니다. 비디오의 세계를 즐겨보세요!</div>
+
+    <script>
+        // 유튜브 영상 ID 배열
+        const videoIds = [
+            'lXO6ZwAZES4', 
+            'ew65qnSEf74', 
+            'tgbNymZ7vqY',
+            'gTrrt4ZSx9E',
+            'F5xYRL6j8k8',
+            'Q7TEGDOfxeY',
+            'PLFjE9vbpAw',
+            'DKPfdTBHizs',
+            '9X6WZfY18ho',
+            'fS3xzFsz_Ps'
+        ];
+
+        const videoPlayer = document.getElementById('video-player');
+        const muteToggle = document.getElementById('mute-toggle');
+        const volumeSlider = document.getElementById('volume-slider');
+        const playButton = document.getElementById('play-button');
+        const backgroundMusic = document.getElementById('background-music');
+        const infoButton = document.getElementById('info-button');
+        const infoSection = document.getElementById('info-section');
+
+        let lastPlayedVideos = []; 
+
+        
+        function getYouTubeUrl(videoId) {
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+        }
+
+        
+        function playRandomVideo() {
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * videoIds.length);
+            } while (lastPlayedVideos.includes(randomIndex));
+
+            
+            lastPlayedVideos.push(randomIndex);
+            if (lastPlayedVideos.length > 2) {
+                lastPlayedVideos.shift(); 
+            }
+
+            videoPlayer.src = getYouTubeUrl(videoIds[randomIndex]);
+        }
+
+        
+        backgroundMusic.volume = 0.5;
+        backgroundMusic.play();
+
+       
+        muteToggle.addEventListener('click', () => {
+            backgroundMusic.muted = !backgroundMusic.muted; 
+            muteToggle.textContent = backgroundMusic.muted ? '🔇' : '🔊'; 
+        });
+
+        
+        volumeSlider.addEventListener('input', (e) => {
+            backgroundMusic.volume = e.target.value; 
+        });
+
+        
+        playButton.addEventListener('click', playRandomVideo);
+
+        
+        infoButton.addEventListener('mouseenter', () => {
+            infoSection.classList.add('active');
+        });
+
+        infoButton.addEventListener('mouseleave', () => {
+            infoSection.classList.remove('active');
+        });
+
+        // 초기 비디오 설정
+        playRandomVideo();
+    </script>
+</body>
+</html>
